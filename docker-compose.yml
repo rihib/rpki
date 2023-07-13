@@ -1,0 +1,64 @@
+version: '3'
+services:
+  routinator:
+    build:
+      context: ./routinator
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - rpki-cache:/root/.rpki-cache
+    ports:
+      - "3323:3323"
+      - "8323:8323"
+    networks:
+      default:
+        ipv4_address: 10.0.255.10
+
+  gobgp1:
+    build:
+      context: ./gobgp
+      dockerfile: Dockerfile
+    volumes:
+      - ./gobgp/gobgpd1.conf:/root/gobgpd1.conf
+    command: ["gobgpd", "-f", "/root/gobgpd1.conf"]
+    ports:
+      - "10001:179"
+    networks:
+      default:
+        ipv4_address: 10.0.255.21
+
+  gobgp2:
+    build:
+      context: ./gobgp
+      dockerfile: Dockerfile
+    volumes:
+      - ./gobgp/gobgpd2.conf:/root/gobgpd2.conf
+    command: ["gobgpd", "-f", "/root/gobgpd2.conf"]
+    ports:
+      - "10002:179"
+    networks:
+      default:
+        ipv4_address: 10.0.255.22
+
+  gobgp3:
+    build:
+      context: ./gobgp
+      dockerfile: Dockerfile
+    volumes:
+      - ./gobgp/gobgpd3.conf:/root/gobgpd3.conf
+    command: ["gobgpd", "-f", "/root/gobgpd3.conf"]
+    ports:
+      - "10003:179"
+    networks:
+      default:
+        ipv4_address: 10.0.255.23
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.255.0/24
+
+volumes:
+  rpki-cache:
